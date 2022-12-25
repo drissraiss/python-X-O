@@ -1,19 +1,23 @@
 from tkinter import*
-from messagebox import showinfo, showwarning
 from random import choice as select
 from time import sleep
 
 
-def endGame(win):
+def endGame(win = 0):
+    global end, autoWin, youWin
     if mode.get() == 2:
         if win == 'X':
             l.config(text='You Won', fg='#00f')
-        else:
+            youWin += 1
+            you.config(text=f'You : {youWin}')
+        elif win == 'O':
             l.config(text='You Lose ', fg='#f00')
+            autoWin += 1
+            autoPL.config(text=f'Auto: {autoWin // 2}')
     else:
         if win == 'X':
             l.config(text='X Win', fg='#00f')
-        else:
+        elif win == 'O':
             l.config(text='O Win', fg='#f00')
     btn1.config(state=DISABLED)
     btn2.config(state=DISABLED)
@@ -24,6 +28,9 @@ def endGame(win):
     btn7.config(state=DISABLED)
     btn8.config(state=DISABLED)
     btn9.config(state=DISABLED)
+    reset.config(state=NORMAL)
+
+    end = True
 
 
 def check():
@@ -81,7 +88,7 @@ def play(btn):
         btn9.config(state=DISABLED, text=x_o, disabledforeground=color)
         board[8] = x_o
     check()
-    if mode.get() == 2:
+    if not end and mode.get() == 2:
         if autoRole:
             autoRole = 0
             app.update()
@@ -91,10 +98,70 @@ def play(btn):
             if len(restPosition) > 1:
                 autoRole = 1
         check()
+    if len(restPosition) == 0 :endGame()
 
 
 def playAuto():
-    if (board[0] == board[1]) and (3 in restPosition):
+    auto = 'O'
+    if (board[0] == auto and board[1] == auto) and (3 in restPosition):
+        choice = 3
+    elif (board[1] == auto and board[2] == auto) and (1 in restPosition):
+        choice = 1
+    elif (board[0] == auto and board[2] == auto) and (2 in restPosition):
+        choice = 2
+
+    elif (board[3] == auto and board[4] == auto) and (6 in restPosition):
+        choice = 6
+    elif (board[4] == auto and board[5] == auto) and (4 in restPosition):
+        choice = 4
+    elif (board[3] == auto and board[5] == auto) and (5 in restPosition):
+        choice = 5
+
+    elif (board[6] == auto and board[7] == auto) and (9 in restPosition):
+        choice = 9
+    elif (board[7] == auto and board[8] == auto) and (7 in restPosition):
+        choice = 7
+    elif (board[6] == auto and board[8] == auto) and (8 in restPosition):
+        choice = 8
+
+    elif (board[0] == auto and board[3] == auto) and (7 in restPosition):
+        choice = 7
+    elif (board[3] == auto and board[6] == auto) and (1 in restPosition):
+        choice = 1
+    elif (board[0] == auto and board[6] == auto) and (4 in restPosition):
+        choice = 4
+
+    elif (board[1] == auto and board[4] == auto) and (8 in restPosition):
+        choice = 8
+    elif (board[4] == auto and board[7] == auto) and (2 in restPosition):
+        choice = 2
+    elif (board[1] == auto and board[7] == auto) and (5 in restPosition):
+        choice = 5
+
+    elif (board[2] == auto and board[5] == auto) and (9 in restPosition):
+        choice = 9
+    elif (board[5] == auto and board[8] == auto) and (3 in restPosition):
+        choice = 3
+    elif (board[2] == auto and board[8] == auto) and (6 in restPosition):
+        choice = 6
+
+    elif (board[0] == auto and board[4] == auto) and (9 in restPosition):
+        choice = 9
+    elif (board[4] == auto and board[8] == auto) and (1 in restPosition):
+        choice = 1
+    elif (board[0] == auto and board[8] == auto) and (5 in restPosition):
+        choice = 5
+
+    elif (board[2] == auto and board[4] == auto) and (7 in restPosition):
+        choice = 7
+    elif (board[4] == auto and board[6] == auto) and (3 in restPosition):
+        choice = 3
+    elif (board[2] == auto and board[6] == auto) and (5 in restPosition):
+        choice = 5
+
+    # -------------------------------
+
+    elif (board[0] == board[1]) and (3 in restPosition):
         choice = 3
     elif (board[1] == board[2]) and (1 in restPosition):
         choice = 1
@@ -157,6 +224,7 @@ def playAuto():
 
 
 def start():
+    global myTurn, x_o, autoRole, firstGame
     if mode.get():
         m1p.config(state=DISABLED)
         m2p.config(state=DISABLED)
@@ -170,16 +238,29 @@ def start():
         btn7.config(state=NORMAL)
         btn8.config(state=NORMAL)
         btn9.config(state=NORMAL)
-        reset.config(state=NORMAL)
         if mode.get() == 2:
-            play(select(restPosition))
+            if firstGame:
+                firstGame = 0
+                app.geometry('398x700+650+180')
+                you.grid(row=6, column=0)
+                autoPL.grid(row=6, column=2)
+            if myTurn:
+                play(select(restPosition))
+                myTurn = False
+            else:
+                x_o = 'O'
+                autoRole = 1
+                myTurn = True
+        elif mode.get() == 1:
+            firstGame = 1
+            app.geometry('398x630+650+180')
     else:
-        app.update()
-        return showwarning('DRS-X_O', 'Please select mode "2 player" or "1 player"')
+        m2p.config(state=ACTIVE)
 
 
 def reset():
-    global board, restPosition, x_o, autoRole
+    global board, restPosition, x_o, autoRole, end
+    end = False
     board = [
         1, 2, 3,
         4, 5, 6,
@@ -208,8 +289,13 @@ def reset():
     reset.config(state=DISABLED)
 
 
+autoWin = 0
+youWin = 0
+firstGame = 1
+end = False
 x_o = 'X'
 autoRole = 0
+myTurn = True
 board = [
     1, 2, 3,
     4, 5, 6,
@@ -224,7 +310,7 @@ restPosition = [
 app = Tk()
 app.title('X-O')
 app.geometry('398x630+650+180')
-
+app.resizable(0, 0)
 l = Label(text='X-O', font=('verdana', 30),
           borderwidth=4, relief="ridge", width=15)
 l.grid(row=0, columnspan=3, pady=10)
@@ -240,37 +326,40 @@ start = Button(text='Start', font=('curier'), width=12, fg='#006400', bg='#d4e6d
                relief=GROOVE, command=start)
 start.grid(row=1, column=2, pady=10)
 
-
 btn1 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(1))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(1))
 btn1.grid(row=2, column=0)
 btn2 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(2))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(2))
 btn2.grid(row=2, column=1)
 btn3 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(3))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(3))
 btn3.grid(row=2, column=2)
 btn4 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(4))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(4))
 btn4.grid(row=3, column=0)
 btn5 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(5))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(5))
 btn5.grid(row=3, column=1)
 btn6 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(6))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(6))
 btn6.grid(row=3, column=2)
 btn7 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(7))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(7))
 btn7.grid(row=4, column=0)
 btn8 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(8))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(8))
 btn8.grid(row=4, column=1)
 btn9 = Button(text=' ', width=3, height=1, relief=GROOVE, state=DISABLED, font=(
-    "curier", 50, 'bold'),cursor='circle', command=lambda: play(9))
+    "curier", 50, 'bold'), cursor='circle', command=lambda: play(9))
 btn9.grid(row=4, column=2)
 
 reset = Button(text='Reset', width=20, font=('arier', 20, 'bold'),
                state=DISABLED, command=reset, cursor='exchange', fg='#ff9500', relief=GROOVE)
 reset.grid(row=5, columnspan=3, pady=20)
+
+you = Label(app, text=f'You : {youWin}', fg='#00f', font=('ariel', 20, 'bold'))
+autoPL = Label(app, text=f'Auto: {autoWin}',
+               fg='#f00', font=('ariel', 20, 'bold'))
 
 app.mainloop()
